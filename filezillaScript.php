@@ -12,11 +12,16 @@
     
     $admin3_local_directory = '/home/faheem/Documents/Downloaded from filezilla/admin3';
     $admin3_remote_directory = '/wwwroot/admin3';
+
+    $mobi_local_directory = '/home/faheem/Documents/Downloaded from filezilla/mobi';
+    $mobi_remote_directory = '/wwwroot/mobi';
+
     if ($connection && $login_result) {
         echo 'Connected to the FTP server.<br>';
 
         downloadDirectory($connection, $remote_directory, $local_directory);
         downloadAdmin3($connection , $admin3_remote_directory , $admin3_local_directory);
+        downloadMobi($connection , $mobi_remote_directory , $mobi_local_directory);
 
     } else {
         echo 'Failed to connect to the FTP server.';
@@ -85,6 +90,50 @@
                 
 
                 if (strval($file_name) == "cfcs" || strval($file_name) == "js" || strval($file_name) == "pages" || strval($file_name) == "print" || strval($file_name) == "reports" || strval($file_name) == "template") {
+
+                    print_r('<br>directory: ' .$file_name ."<br>");
+                    if (!is_dir($local_directory."/".$file_name)) {
+                        mkdir($local_directory."/".$file_name, 0777, true);
+                    }
+                    
+                    $files = ftp_nlist($connection, $file);
+        
+                    foreach ($files as $file) {
+                        
+                        $sub_dir_file_name = file_name($file);
+                        $remote_file = $file;
+                        $local_file = $local_directory."/".$file_name."/".$sub_dir_file_name;
+                    
+                        download_file($connection, $local_file, $remote_file);
+                    }
+                    continue;
+                    
+                }
+
+                
+                $remote_file = $file;
+                $local_file = $local_directory ."/". $file_name;
+               
+                download_file($connection, $local_file, $remote_file);
+            }
+        }
+
+    }
+
+    function downloadMobi($connection, $remote_directory, $local_directory){
+
+        if (!is_dir($local_directory)) {
+            mkdir($local_directory, 0777, true);
+        }
+        $files = ftp_nlist($connection, $remote_directory);
+
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') {
+                
+                $file_name = file_name($file);
+                
+
+                if (strval($file_name) == "cfcs" ) {
 
                     print_r('<br>directory: ' .$file_name ."<br>");
                     if (!is_dir($local_directory."/".$file_name)) {
