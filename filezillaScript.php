@@ -9,6 +9,9 @@
 
     $remote_directory = '/wwwroot';
     $local_directory = '/home/faheem/Documents/Downloaded from filezilla';
+
+    $autopub_local_directory = '/home/faheem/Documents/Downloaded from filezilla/autopub';
+    $autopub_remote_directory = '/wwwroot/autopub';
     
     $admin3_local_directory = '/home/faheem/Documents/Downloaded from filezilla/admin3';
     $admin3_remote_directory = '/wwwroot/admin3';
@@ -16,19 +19,26 @@
     $mobi_local_directory = '/home/faheem/Documents/Downloaded from filezilla/mobi';
     $mobi_remote_directory = '/wwwroot/mobi';
 
+    $root_folders = ["includes","cfcs"];
+    $autopub_folders = ["cfcs"];
+    $admin3_folders = ["cfcs","js","pages","print","reports","template"];
+    $mobi_folders = ["cfcs"];
+
+
     if ($connection && $login_result) {
         echo 'Connected to the FTP server.<br>';
 
-        downloadDirectory($connection, $remote_directory, $local_directory);
-        downloadAdmin3($connection , $admin3_remote_directory , $admin3_local_directory);
-        downloadMobi($connection , $mobi_remote_directory , $mobi_local_directory);
+        downloadRoot($connection, $remote_directory, $local_directory,$root_folders);
+        downloadFolders($connection , $autopub_remote_directory , $autopub_local_directory, $autopub_folders);
+        downloadFolders($connection , $admin3_remote_directory , $admin3_local_directory,$admin3_folders);
+        downloadFolders($connection , $mobi_remote_directory , $mobi_local_directory, $mobi_folders);
 
     } else {
         echo 'Failed to connect to the FTP server.';
         exit;
     }
 
-    function downloadDirectory($connection, $remote_directory, $local_directory)
+    function downloadRoot($connection, $remote_directory, $local_directory,$folders)
     {
         
 
@@ -37,22 +47,19 @@
         foreach ($files as $file) {
             if ($file != '.' && $file != '..') {
 
-                
                 $file_name = file_name($file);
                 
 
-                if (strval($file_name) == "autopub" || strval($file_name) == "includes" || strval($file_name) == "cfcs") {
+                if (in_array(strval($file_name),$folders)) {
 
                     print_r('<br>directory: ' .$file_name ."<br>");
 
-                    if (!is_dir($local_directory."/".$file_name)) {
-                        mkdir($local_directory."/".$file_name, 0777, true);
-                    }
-
+                    makeDir($local_directory,$file_name);
+                    echo "directory is made";
                     $files = ftp_nlist($connection, $file);
-        
+                    echo "files listed";
                     foreach ($files as $file) {
-                        
+                        echo "inside files loop";
                         $sub_dir_file_name = file_name($file);
                         $remote_file = $file;
                         $local_file = $local_directory."/".$file_name."/".$sub_dir_file_name;
@@ -61,11 +68,10 @@
                     }
                     continue;
                     
+                }else{
+                    echo "issue is here";
                 }
 
-
-                
-  
                 $remote_file = $file;
                 $local_file = $local_directory ."/". $file_name;
                
@@ -76,11 +82,9 @@
     }
 
 
-    function downloadAdmin3($connection, $remote_directory, $local_directory){
+    function downloadFolders($connection, $remote_directory, $local_directory,$folders){
 
-        if (!is_dir($local_directory)) {
-            mkdir($local_directory, 0777, true);
-        }
+        makeDir($local_directory);
         $files = ftp_nlist($connection, $remote_directory);
 
         foreach ($files as $file) {
@@ -89,12 +93,10 @@
                 $file_name = file_name($file);
                 
 
-                if (strval($file_name) == "cfcs" || strval($file_name) == "js" || strval($file_name) == "pages" || strval($file_name) == "print" || strval($file_name) == "reports" || strval($file_name) == "template") {
+                if (in_array(strval($file_name),$folders)) {
 
                     print_r('<br>directory: ' .$file_name ."<br>");
-                    if (!is_dir($local_directory."/".$file_name)) {
-                        mkdir($local_directory."/".$file_name, 0777, true);
-                    }
+                    makeDir($local_directory,$file_name);
                     
                     $files = ftp_nlist($connection, $file);
         
@@ -120,49 +122,7 @@
 
     }
 
-    function downloadMobi($connection, $remote_directory, $local_directory){
-
-        if (!is_dir($local_directory)) {
-            mkdir($local_directory, 0777, true);
-        }
-        $files = ftp_nlist($connection, $remote_directory);
-
-        foreach ($files as $file) {
-            if ($file != '.' && $file != '..') {
-                
-                $file_name = file_name($file);
-                
-
-                if (strval($file_name) == "cfcs" ) {
-
-                    print_r('<br>directory: ' .$file_name ."<br>");
-                    if (!is_dir($local_directory."/".$file_name)) {
-                        mkdir($local_directory."/".$file_name, 0777, true);
-                    }
-                    
-                    $files = ftp_nlist($connection, $file);
-        
-                    foreach ($files as $file) {
-                        
-                        $sub_dir_file_name = file_name($file);
-                        $remote_file = $file;
-                        $local_file = $local_directory."/".$file_name."/".$sub_dir_file_name;
-                    
-                        download_file($connection, $local_file, $remote_file);
-                    }
-                    continue;
-                    
-                }
-
-                
-                $remote_file = $file;
-                $local_file = $local_directory ."/". $file_name;
-               
-                download_file($connection, $local_file, $remote_file);
-            }
-        }
-
-    }
+    
 
 ftp_close($connection);
 
@@ -183,6 +143,19 @@ function download_file($connection, $local_file, $remote_file){
     } else {
         echo 'Failed to download the file: ' . $remote_file . PHP_EOL."<br>";
         print_r(error_get_last());
+    }
+}
+
+
+function makeDir($local_directory, $file_name=null){
+    if($file_name == null){
+        if (!is_dir($local_directory)) {
+            mkdir($local_directory, 0777, true);
+        }
+    }else{
+        if (!is_dir($local_directory."/".$file_name)) {
+            mkdir($local_directory."/".$file_name, 0777, true);
+        }
     }
 }
     
