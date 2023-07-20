@@ -52,14 +52,14 @@
 
                 if (in_array(strval($file_name),$folders)) {
 
-                    print_r('<br>directory: ' .$file_name ."<br>");
+  
 
                     makeDir($local_directory,$file_name);
-                    echo "directory is made";
+  
                     $files = ftp_nlist($connection, $file);
-                    echo "files listed";
+  
                     foreach ($files as $file) {
-                        echo "inside files loop";
+     
                         $sub_dir_file_name = file_name($file);
                         $remote_file = $file;
                         $local_file = $local_directory."/".$file_name."/".$sub_dir_file_name;
@@ -69,7 +69,7 @@
                     continue;
                     
                 }else{
-                    echo "issue is here";
+                    
                 }
 
                 $remote_file = $file;
@@ -95,7 +95,7 @@
 
                 if (in_array(strval($file_name),$folders)) {
 
-                    print_r('<br>directory: ' .$file_name ."<br>");
+                  
                     makeDir($local_directory,$file_name);
                     
                     $files = ftp_nlist($connection, $file);
