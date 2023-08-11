@@ -1,22 +1,24 @@
 <?php
 
-    $ftp_server = 'ftp.dlptest.com';
-    $ftp_username = 'dlpuser';
-    $ftp_password = 'rNrKYTX9g7z3RgJRmxWuGHbeu';
+    $ftp_server = '216.198.210.122';
+    $ftp_username = 'waqas20';
+    $ftp_password = 'JShX3$a2';
     
     $connection = ftp_connect($ftp_server);
     $login_result = ftp_login($connection, $ftp_username, $ftp_password);
+    ftp_pasv( $connection, true );
 
     $remote_directory = '/wwwroot';
-    $local_directory = '/home/faheem/Documents/Downloaded from filezilla';
+    $base_local_path = '/home/zubair/Documents/ncdg1';
+    $local_directory = $base_local_path;
 
-    $autopub_local_directory = '/home/faheem/Documents/Downloaded from filezilla/autopub';
+    $autopub_local_directory = $base_local_path.'/autopub';
     $autopub_remote_directory = '/wwwroot/autopub';
     
-    $admin3_local_directory = '/home/faheem/Documents/Downloaded from filezilla/admin3';
+    $admin3_local_directory = $base_local_path.'/admin3';
     $admin3_remote_directory = '/wwwroot/admin3';
 
-    $mobi_local_directory = '/home/faheem/Documents/Downloaded from filezilla/mobi';
+    $mobi_local_directory = $base_local_path.'/mobi';
     $mobi_remote_directory = '/wwwroot/mobi';
 
     $root_folders = ["includes","cfcs"];
@@ -43,7 +45,8 @@
         
 
         $files = ftp_nlist($connection, $remote_directory);
-        
+
+     
         foreach ($files as $file) {
             if ($file != '.' && $file != '..') {
 
@@ -63,7 +66,8 @@
                         $sub_dir_file_name = file_name($file);
                         $remote_file = $file;
                         $local_file = $local_directory."/".$file_name."/".$sub_dir_file_name;
-                    
+                        echo "<br>Remote file: ".$remote_file. "<br>";
+                        echo "Local file: ".$local_file. "<br>";
                         download_file($connection, $local_file, $remote_file);
                     }
                     continue;
@@ -74,7 +78,8 @@
 
                 $remote_file = $file;
                 $local_file = $local_directory ."/". $file_name;
-               
+                echo "<br>Remote file: ".$remote_file. "<br>";
+                echo "Local file: ".$local_file. "<br>";
                 download_file($connection, $local_file, $remote_file);
             
             }
@@ -139,10 +144,10 @@ function file_name($file){
 function download_file($connection, $local_file, $remote_file){
     if (ftp_get($connection, $local_file, $remote_file, FTP_BINARY)) {
         echo 'File downloaded: ' . $local_file . PHP_EOL."<br>";
-        print_r(error_get_last());
+
     } else {
         echo 'Failed to download the file: ' . $remote_file . PHP_EOL."<br>";
-        print_r(error_get_last());
+
     }
 }
 
